@@ -11,6 +11,7 @@ const BOT_TOKEN = process.env.BOT_TOKEN!;
 const PAYMENT_PROVIDER_TOKEN = process.env.PAYMENT_PROVIDER_TOKEN || "";
 const SUBSCRIPTION_DAYS = Number(process.env.SUBSCRIPTION_DAYS || 30);
 const STARS_AMOUNT = Number(process.env.STARS_AMOUNT || 330);
+const SUBSCRIPTION_PRICE_KRW = Number(process.env.SUBSCRIPTION_PRICE_KRW || 10000);
 
 // Toss Bank manual-transfer flow (admin-approved, no merchant API)
 const ADMIN_TELEGRAM_ID = process.env.ADMIN_TELEGRAM_ID
@@ -228,7 +229,7 @@ async function sendTelegramInvoice(chatId: number, fromId: number) {
       JSON.stringify({ telegram_id: fromId, days: SUBSCRIPTION_DAYS }),
       PAYMENT_PROVIDER_TOKEN,
       "KRW",
-      [{ label: `Pro — ${SUBSCRIPTION_DAYS} дней`, amount: 10000 * 100 }],
+      [{ label: `Pro — ${SUBSCRIPTION_DAYS} дней`, amount: SUBSCRIPTION_PRICE_KRW * 100 }],
     );
   } else {
     await bot.sendInvoice(
@@ -531,7 +532,7 @@ bot.on("callback_query", async (query) => {
 bot.on("pre_checkout_query", async (query) => {
   const expectedAmount =
     query.currency === "KRW"
-      ? 10000 * 100
+      ? SUBSCRIPTION_PRICE_KRW * 100
       : query.currency === "XTR"
         ? STARS_AMOUNT
         : null;
