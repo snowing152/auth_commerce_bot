@@ -1,0 +1,26 @@
+{
+  "name": "authbot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/bot.js",
+    "postinstall": "tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.101.1",
+    "dotenv": "^17.4.0",
+    "node-telegram-bot-api": "^0.67.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "@types/node-telegram-bot-api": "^0.64.14",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.2"
+  }
+}

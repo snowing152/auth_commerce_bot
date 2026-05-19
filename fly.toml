@@ -1,0 +1,19 @@
+# fly.toml app configuration file generated for authbot-weathered-driftwood-8444 on 2026-05-08T16:24:16+09:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'authbot-weathered-driftwood-8444'
+primary_region = 'sin'
+
+[build]
+
+[env]
+  NODE_ENV = 'production'
+
+
+[[vm]]
+  memory = '256mb'
+  cpu_kind = 'shared'
+  cpus = 1
+  memory_mb = 256
