@@ -41,6 +41,7 @@ function mainKeyboard() {
       keyboard: [
         [{ text: "📊 Статус подписки" }],
         [{ text: "💳 Оплатить подписку" }],
+        [{ text: "📖 Инструкция" }],
         [{ text: "❓ Помощь" }],
       ],
       resize_keyboard: true,
@@ -185,7 +186,7 @@ bot.onText(/\/start(?:\s+login_(.+))?/, async (msg, match) => {
   }
 });
 
-bot.onText(/^\/help(?:\s|$)/, async (msg) => {
+bot.onText(/инструкция/i, async (msg) => {
   await sendInstruction(msg.chat.id);
 });
 
