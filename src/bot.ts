@@ -259,9 +259,13 @@ bot.onText(/оплатить подписку/i, async (msg) => {
     ]);
   }
 
-  await bot.sendMessage(chatId, "Выберите способ оплаты:", {
-    reply_markup: { inline_keyboard },
-  });
+  await bot.sendMessage(
+    chatId,
+    "Выберите способ оплаты(пока только оплата через перевод на Toss):",
+    {
+      reply_markup: { inline_keyboard },
+    },
+  );
 });
 
 async function startTossOrder(chatId: number, fromId: number) {
