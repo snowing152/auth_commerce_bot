@@ -140,7 +140,7 @@ bot.onText(/\/start(?:\s+login_(.+))?/, async (msg, match) => {
       username: tgUser.username || null,
       subscription_status: "trial",
       trial_start: now.toISOString(),
-      trial_end: new Date(now.getTime() + 1 * 86400_000).toISOString(),
+      trial_end: new Date(now.getTime() + 3 * 86400_000).toISOString(),
     });
   }
 
@@ -193,6 +193,29 @@ bot.onText(/статус подписки/i, async (msg) => {
   }
 
   bot.sendMessage(msg.chat.id, text, { parse_mode: "HTML", ...mainKeyboard() });
+});
+
+// ── Help ─────────────────────────────────────────────────────
+bot.onText(/помощь/i, async (msg) => {
+  if (!ADMIN_TELEGRAM_ID) return;
+
+  const u = msg.from!;
+  const userLabel = u.username
+    ? `@${u.username}`
+    : `${u.first_name}${u.last_name ? " " + u.last_name : ""}`;
+
+  // Forward support request to admin with user info
+  await bot.sendMessage(
+    ADMIN_TELEGRAM_ID,
+    `🆘 <b>Запрос помощи</b>\n\nПользователь: <b>${htmlEscape(userLabel)}</b>\nID: <code>${u.id}</code>`,
+    { parse_mode: "HTML" },
+  );
+
+  await bot.sendMessage(
+    msg.chat.id,
+    "✅ Ваш запрос отправлен администратору. Ожидайте ответа.",
+    mainKeyboard(),
+  );
 });
 
 // ── Payment ──────────────────────────────────────────────────
@@ -278,7 +301,7 @@ async function startTossOrder(chatId: number, fromId: number) {
   }
 
   const text = [
-    `🏦 <b>Оплата через Toss Bank</b>`,
+    `🏦 <b>Оплата переводом</b>`,
     ``,
     `Переведите <b>${TOSS_PRICE_KRW.toLocaleString("ko-KR")} KRW</b> на счёт:`,
     ``,
