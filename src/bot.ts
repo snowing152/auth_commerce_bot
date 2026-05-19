@@ -24,6 +24,8 @@ const TOSS_PRICE_KRW = Number(process.env.TOSS_PRICE_KRW || 10000);
 const TOSS_DAYS = Number(process.env.TOSS_DAYS || 30);
 const TOSS_ENABLED = ADMIN_TELEGRAM_ID !== null && TOSS_ACCOUNT_NUMBER !== "";
 
+const INSTRUCTION_PATH = path.join(__dirname, "../instruction.html");
+
 // ── Supabase (service key — server only) ────────────────────
 const supabase = createClient(
   process.env.SUPABASE_URL!,
@@ -66,6 +68,19 @@ function generateMemo(): string {
     out += alphabet[crypto.randomInt(0, alphabet.length)];
   }
   return out;
+}
+
+async function sendInstruction(chatId: number): Promise<void> {
+  try {
+    await bot.sendDocument(
+      chatId,
+      INSTRUCTION_PATH,
+      { caption: "📖 Инструкция по использованию бота" },
+      { filename: "instruction.html", contentType: "text/html" },
+    );
+  } catch (e) {
+    console.error("[sendInstruction] failed:", e);
+  }
 }
 
 async function extendSubscription(
@@ -134,7 +149,9 @@ bot.onText(/\/start(?:\s+login_(.+))?/, async (msg, match) => {
     .eq("telegram_id", tgUser.id)
     .single();
 
-  if (!existing) {
+  const isNewUser = !existing;
+
+  if (isNewUser) {
     await supabase.from("users").insert({
       telegram_id: tgUser.id,
       first_name: tgUser.first_name,
@@ -157,11 +174,19 @@ bot.onText(/\/start(?:\s+login_(.+))?/, async (msg, match) => {
     return bot.sendMessage(chatId, "❌ Ссылка недействительна.");
   }
 
-  bot.sendMessage(
+  await bot.sendMessage(
     chatId,
     `✅ <b>Вход выполнен!</b>\n\nВернитесь в приложение.`,
     { parse_mode: "HTML", ...mainKeyboard() },
   );
+
+  if (isNewUser) {
+    await sendInstruction(chatId);
+  }
+});
+
+bot.onText(/^\/help(?:\s|$)/, async (msg) => {
+  await sendInstruction(msg.chat.id);
 });
 
 // ── Status ───────────────────────────────────────────────────

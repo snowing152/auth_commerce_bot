@@ -1,0 +1,1854 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Coupang Bot — Инструкция</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:        #0d0d11;
+      --bg2:       #111116;
+      --card:      #18181f;
+      --card2:     #1e1e27;
+      --border:    #2a2a35;
+      --border2:   #323240;
+      --text:      #e8e8f0;
+      --muted:     #6b6b80;
+      --muted2:    #9595a8;
+      --accent:    #29b0e8;
+      --accent-h:  #1a9fd8;
+      --accent-dim:#29b0e820;
+      --green:     #22c55e;
+      --green-dim: #22c55e1a;
+      --green-bdr: #22c55e40;
+      --warn:      #f59e0b;
+      --warn-dim:  #f59e0b1a;
+      --warn-bdr:  #f59e0b40;
+      --red:       #ef4444;
+      --red-dim:   #ef44441a;
+      --red-bdr:   #ef444440;
+      --radius:    10px;
+      --radius-sm: 6px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      font-size: 14px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Header ── */
+    .header {
+      border-bottom: 1px solid var(--border);
+      background: var(--bg2);
+      padding: 0 40px;
+    }
+
+    .header-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      width: 30px; height: 30px;
+      background: var(--card2);
+      border: 1px solid var(--border2);
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: monospace;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: -1px;
+    }
+
+    .logo-text { font-size: 14px; font-weight: 600; color: var(--text); }
+    .logo-ver  { font-size: 11px; color: var(--muted); background: var(--card2); border: 1px solid var(--border); padding: 2px 7px; border-radius: 100px; }
+
+    .header-tag {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* ── Hero ── */
+    .hero {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 52px 40px 40px;
+    }
+
+    .hero-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent)30;
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 100px;
+      margin-bottom: 20px;
+    }
+
+    .hero-label::before {
+      content: '';
+      width: 5px; height: 5px;
+      background: var(--accent);
+      border-radius: 50%;
+    }
+
+    .hero h1 {
+      font-size: 34px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #fff;
+      margin-bottom: 12px;
+      line-height: 1.15;
+    }
+
+    .hero p {
+      font-size: 15px;
+      color: var(--muted2);
+      max-width: 480px;
+      line-height: 1.65;
+    }
+
+    /* ── Nav ── */
+    .nav {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 40px 36px;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .nav a {
+      font-size: 12px;
+      font-weight: 500;
+      padding: 5px 14px;
+      border-radius: 100px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--muted2);
+      text-decoration: none;
+      transition: all 0.15s;
+    }
+
+    .nav a:hover {
+      color: var(--accent);
+      border-color: var(--accent)50;
+      background: var(--accent-dim);
+    }
+
+    /* ── Wrap ── */
+    .wrap {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 40px 100px;
+    }
+
+    /* ── Section ── */
+    section { margin-bottom: 32px; }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+    }
+
+    .sec-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    h2 {
+      font-size: 17px;
+      font-weight: 700;
+      color: #fff;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+      margin-bottom: 22px;
+      letter-spacing: -0.01em;
+    }
+
+    h3 {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    /* ── Intro 2-col ── */
+    .intro-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .intro-card {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 18px 20px;
+      border-left: 3px solid var(--accent);
+    }
+
+    .intro-card.green { border-left-color: var(--green); }
+    .intro-card .ico { font-size: 22px; margin-bottom: 10px; display: block; }
+    .intro-card h3 { color: #fff; margin-bottom: 5px; }
+    .intro-card p { font-size: 12px; color: var(--muted); line-height: 1.6; }
+
+    /* ── Steps ── */
+    .steps { display: flex; flex-direction: column; }
+
+    .step {
+      display: flex;
+      gap: 16px;
+      position: relative;
+    }
+
+    .step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 15px;
+      top: 32px;
+      bottom: 0;
+      width: 1px;
+      background: var(--border);
+    }
+
+    .step-num {
+      width: 32px;
+      min-width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--card2);
+      border: 1px solid var(--border2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .step-body {
+      flex: 1;
+      min-width: 0;
+      padding-bottom: 26px;
+    }
+
+    .step-body h3 { margin-top: 5px; margin-bottom: 7px; }
+
+    .step-body p {
+      font-size: 13px;
+      color: var(--muted2);
+      line-height: 1.7;
+    }
+
+    /* ── Callouts ── */
+    .callout {
+      border-radius: var(--radius-sm);
+      padding: 11px 14px;
+      font-size: 12.5px;
+      line-height: 1.6;
+      margin-top: 10px;
+      display: flex;
+      gap: 9px;
+      align-items: flex-start;
+    }
+
+    .ci { flex-shrink: 0; font-size: 14px; margin-top: 1px; }
+
+    .callout.info    { background: var(--accent-dim); border: 1px solid var(--accent)30; color: #7dd3f5; }
+    .callout.warn    { background: var(--warn-dim);   border: 1px solid var(--warn-bdr); color: #fcd34d; }
+    .callout.success { background: var(--green-dim);  border: 1px solid var(--green-bdr); color: #86efac; }
+    .callout.danger  { background: var(--red-dim);    border: 1px solid var(--red-bdr);   color: #fca5a5; }
+
+    /* ── Code ── */
+    code {
+      background: var(--card2);
+      border: 1px solid var(--border2);
+      border-radius: 4px;
+      padding: 1px 7px;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 12px;
+      color: var(--accent);
+    }
+
+    /* ── Screenshot mockup ── */
+    .screen-mock {
+      background: var(--bg);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      margin-top: 14px;
+      font-size: 12px;
+    }
+
+    .mock-bar {
+      background: var(--card2);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .mock-bar-left { display: flex; align-items: center; gap: 8px; }
+    .mock-bar b { color: var(--text); font-weight: 600; }
+
+    .mock-body { padding: 14px; }
+
+    /* ── Sign in mockup ── */
+    .signin-mock {
+      background: var(--bg);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      padding: 24px;
+      margin-top: 14px;
+      text-align: center;
+    }
+
+    .signin-logo-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .signin-logo-box {
+      width: 28px; height: 28px;
+      background: var(--card2);
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: monospace;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .signin-logo-text { font-size: 13px; font-weight: 600; }
+    .signin-logo-sub  { font-size: 11px; color: var(--muted); }
+
+    .signin-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      max-width: 340px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .signin-card h4 { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+    .signin-card p  { font-size: 12px; color: var(--muted2); margin-bottom: 16px; line-height: 1.5; }
+
+    .tg-btn-big {
+      background: var(--accent);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px 20px;
+      border-radius: 7px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      width: 100%;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+
+    .ready-row {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      text-align: left;
+    }
+
+    .ready-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
+    .ready-text b { color: var(--text); font-size: 12px; display: block; }
+    .ready-text span { color: var(--muted); font-size: 11px; }
+
+    /* ── Task list mockup ── */
+    .task-mock { margin-top: 14px; }
+
+    .task-item {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .task-content {}
+    .task-keyword { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+    .task-name    { font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 280px; }
+    .task-id      { font-size: 10px; color: var(--muted); margin-top: 4px; }
+
+    .task-badges { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 100px;
+      border: 1px solid;
+    }
+
+    .badge.idle  { color: var(--muted); border-color: var(--border2); background: transparent; }
+    .badge.found { color: var(--green); border-color: var(--green-bdr); background: var(--green-dim); }
+    .badge.running { color: var(--accent); border-color: var(--accent)40; background: var(--accent-dim); }
+
+    /* ── Log mockup ── */
+    .log-mock {
+      background: var(--bg);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      font-family: 'Consolas', monospace;
+      font-size: 11.5px;
+      margin-top: 10px;
+    }
+
+    .log-row { display: flex; gap: 14px; padding: 3px 0; }
+    .log-time { color: var(--muted); flex-shrink: 0; width: 56px; }
+    .log-level { flex-shrink: 0; width: 42px; }
+    .log-level.info    { color: var(--accent); }
+    .log-level.warn    { color: var(--warn); }
+    .log-level.success { color: var(--green); }
+    .log-level.error   { color: var(--red); }
+    .log-src  { color: var(--muted); flex-shrink: 0; width: 60px; }
+    .log-msg  { color: var(--muted2); }
+
+    /* ── Fields table ── */
+    .fields {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      margin-top: 14px;
+      font-size: 13px;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .field-row:last-child { border-bottom: none; }
+
+    .field-name {
+      background: var(--card2);
+      padding: 11px 14px;
+      font-weight: 600;
+      color: var(--text);
+      border-right: 1px solid var(--border);
+      font-size: 12px;
+    }
+
+    .field-name.req::after { content: ' *'; color: var(--red); }
+
+    .field-desc {
+      padding: 11px 14px;
+      color: var(--muted2);
+      line-height: 1.6;
+      font-size: 12px;
+    }
+
+    .field-desc strong { color: var(--text); font-weight: 500; }
+
+    /* ── Button list ── */
+    .btn-list { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+
+    .btn-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+    }
+
+    .fake-btn {
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 5px 14px;
+      border-radius: 6px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .fake-btn.blue   { background: var(--accent);    color: #fff; }
+    .fake-btn.green  { background: var(--green);     color: #fff; }
+    .fake-btn.ghost  { background: transparent; color: var(--muted2); border: 1px solid var(--border2); }
+    .fake-btn.danger { background: transparent; color: var(--red);    border: 1px solid var(--red-bdr); }
+
+    .btn-item p { font-size: 12px; color: var(--muted); }
+
+    /* ── Subscription mockup ── */
+    .sub-card {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-top: 16px;
+    }
+
+    .sub-header {
+      padding: 16px 20px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .sub-icon {
+      width: 34px; height: 34px;
+      background: var(--card);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+
+    .sub-plan { font-size: 14px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px; }
+    .sub-price { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    .sub-active {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 100px;
+      background: var(--green-dim);
+      color: var(--green);
+      border: 1px solid var(--green-bdr);
+    }
+
+    .sub-row {
+      padding: 13px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+    }
+
+    .sub-row:last-child { border-bottom: none; }
+    .sub-row .label { color: var(--muted); }
+    .sub-row .val   { color: #fff; font-weight: 500; }
+    .sub-row .val.active { color: var(--accent); }
+
+    /* ── Status grid ── */
+    .status-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .status-card {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px 14px;
+      text-align: center;
+    }
+
+    .status-card .sico { font-size: 22px; margin-bottom: 8px; display: block; }
+    .status-card h4 { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .status-card p  { font-size: 11px; color: var(--muted); line-height: 1.5; }
+
+    /* ── Payment ── */
+    .pay-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .pay-card {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 18px 20px;
+    }
+
+    .pay-card h4 {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .pay-card ol {
+      padding-left: 16px;
+      font-size: 12.5px;
+      color: var(--muted2);
+    }
+
+    .pay-card ol li {
+      padding: 4px 0;
+      line-height: 1.6;
+    }
+
+    .pay-card ol li strong { color: var(--text); font-weight: 500; }
+
+    /* ── FAQ ── */
+    .faq-item {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+
+    .faq-q {
+      padding: 13px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      background: var(--card2);
+      user-select: none;
+      transition: background 0.15s;
+    }
+
+    .faq-q:hover { background: var(--card); }
+
+    .faq-q .arr {
+      font-size: 10px;
+      color: var(--muted);
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+
+    .faq-item.open .arr { transform: rotate(180deg); }
+
+    .faq-a {
+      display: none;
+      padding: 13px 16px 15px;
+      font-size: 12.5px;
+      color: var(--muted2);
+      line-height: 1.7;
+      background: var(--card);
+      border-top: 1px solid var(--border);
+    }
+
+    .faq-item.open .faq-a { display: block; }
+
+    /* ── Divider ── */
+    .divider { border: none; border-top: 1px solid var(--border); margin: 18px 0; }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      background: var(--bg2);
+      padding: 20px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--muted);
+      max-width: 100%;
+    }
+
+    .footer-logo { display: flex; align-items: center; gap: 8px; color: var(--muted2); font-weight: 500; }
+
+    /* ── Lang switcher demo ── */
+    .lang-demo {
+      display: flex;
+      gap: 2px;
+      background: var(--card2);
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      padding: 3px;
+    }
+
+    .lang-btn {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 4px;
+      color: var(--muted);
+      cursor: default;
+    }
+
+    .active-lang {
+      background: var(--card);
+      color: var(--text);
+      border: 1px solid var(--border2);
+    }
+
+    /* ── Schedule mockup ── */
+    .schedule-mock {
+      background: var(--bg);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-top: 14px;
+      margin-bottom: 14px;
+      max-width: 380px;
+    }
+
+    .schedule-header {
+      padding: 16px 20px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .schedule-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 3px;
+    }
+
+    .schedule-sub {
+      font-size: 11.5px;
+      color: var(--muted);
+    }
+
+    .schedule-body {
+      padding: 16px 20px 14px;
+    }
+
+    .schedule-checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--text);
+      font-weight: 500;
+      margin-bottom: 16px;
+    }
+
+    .schedule-check {
+      width: 20px; height: 20px;
+      background: var(--green);
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: #fff;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .schedule-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 7px;
+    }
+
+    .schedule-select {
+      background: var(--card2);
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      padding: 9px 12px;
+      font-size: 13px;
+      color: var(--text);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .schedule-next {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    .schedule-next strong { color: var(--accent); }
+
+    .schedule-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    /* ── Interval list ── */
+    .interval-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .interval-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12.5px;
+    }
+
+    .interval-val {
+      font-weight: 700;
+      color: var(--accent);
+      min-width: 64px;
+    }
+
+    .interval-desc { color: var(--muted); }
+
+    /* ── Beta banner ── */
+    .beta-banner-wrap {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 40px 20px;
+    }
+
+    .beta-banner {
+      background: rgba(245,158,11,0.08);
+      border: 1px solid rgba(245,158,11,0.3);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 12.5px;
+      color: #fcd34d;
+      line-height: 1.6;
+    }
+
+    .beta-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+    .beta-banner strong { color: #fde68a; }
+    .beta-banner a { color: var(--accent); text-decoration: underline; }
+
+    /* ── Benefits grid ── */
+    .benefits-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .benefit-card {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px 18px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    .benefit-icon {
+      width: 38px;
+      min-width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .benefit-body h4 {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 5px;
+    }
+
+    .benefit-body p {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    /* ── Report a Problem mockup ── */
+    .report-mock {
+      background: var(--bg);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-top: 14px;
+      margin-bottom: 14px;
+      max-width: 480px;
+    }
+
+    .report-header {
+      padding: 16px 20px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .report-warn-icon {
+      font-size: 18px;
+      color: var(--warn);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .report-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 3px;
+    }
+
+    .report-sub {
+      font-size: 11.5px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .report-body { padding: 16px 20px 14px; }
+
+    .report-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 7px;
+    }
+
+    .report-select {
+      background: var(--card2);
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      padding: 9px 12px;
+      font-size: 13px;
+      color: var(--text);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .report-arrow { color: var(--muted); font-size: 12px; }
+
+    .report-textarea {
+      background: var(--card2);
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-size: 12.5px;
+      color: var(--muted);
+      min-height: 72px;
+      line-height: 1.5;
+    }
+
+    .report-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 14px;
+    }
+
+    .report-esc {
+      font-size: 11px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .report-esc span {
+      background: var(--card2);
+      border: 1px solid var(--border2);
+      border-radius: 4px;
+      padding: 2px 7px;
+      font-size: 10px;
+      color: var(--muted2);
+    }
+
+    .report-btns { display: flex; gap: 8px; }
+
+    .report-btn-cancel {
+      background: transparent;
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      color: var(--muted2);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 7px 16px;
+      cursor: default;
+    }
+
+    .report-btn-send {
+      background: var(--card2);
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 7px 16px;
+      cursor: default;
+    }
+
+    /* ── Problem type list ── */
+    .problem-types {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .problem-type-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12.5px;
+      color: var(--muted2);
+    }
+
+    .pt-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--border2);
+      flex-shrink: 0;
+    }
+
+    .problem-type-item span:nth-child(2) { color: var(--text); font-weight: 500; }
+    .pt-desc { color: var(--muted); }
+
+    /* ── Checklist ── */
+    .checklist {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      margin-top: 12px;
+    }
+
+    .check-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12.5px;
+      color: var(--muted2);
+    }
+
+    .check-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .green-dot { background: var(--green); }
+
+    /* ── Responsive additions ── */
+    @media (max-width: 640px) {
+      .benefits-grid { grid-template-columns: 1fr; }
+      .beta-banner-wrap { padding-left: 16px; padding-right: 16px; }
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      .header, .hero, .nav, .wrap { padding-left: 16px; padding-right: 16px; }
+      .intro-grid, .pay-grid, .status-grid { grid-template-columns: 1fr; }
+      .field-row { grid-template-columns: 1fr; }
+      .field-name { border-right: none; border-bottom: 1px solid var(--border); }
+      .hero h1 { font-size: 26px; }
+      .card { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Topbar ── -->
+<div class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">[:]</div>
+      <span class="logo-text">Coupang Bot</span>
+      <span class="logo-ver">v2.0.5</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:16px;">
+      <div class="lang-demo">
+        <span class="lang-btn active-lang">EN</span>
+        <span class="lang-btn">RU</span>
+      </div>
+      <span class="header-tag">Инструкция пользователя</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── Hero ── -->
+<div class="hero">
+  <div class="hero-label">Официальная инструкция</div>
+  <h1>Coupang Automation Bot</h1>
+  <p>Полное руководство: первый вход, работа с задачами, управление подпиской через Telegram.</p>
+</div>
+
+<!-- ── Beta banner ── -->
+<div class="beta-banner-wrap">
+  <div class="beta-banner">
+    <span class="beta-icon">⚠️</span>
+    <div>
+      <strong>Тестовая версия (Beta)</strong> — приложение находится в активной разработке. Некоторые функции могут работать нестабильно, возможны баги. Если что-то пошло не так — используйте кнопку <strong>Report a Problem</strong> в приложении или раздел <a href="#bugreport">Баг-репорт</a> в этой инструкции.
+    </div>
+  </div>
+</div>
+
+<!-- ── Nav ── -->
+<nav class="nav">
+  <a href="#benefits">Зачем это нужно</a>
+  <a href="#about">О системе</a>
+  <a href="#signin">Вход</a>
+  <a href="#tasks">Задачи</a>
+  <a href="#schedule">Расписание</a>
+  <a href="#logs">Логи</a>
+  <a href="#subscription">Подписка</a>
+  <a href="#payment">Оплата</a>
+  <a href="#bugreport">Баг-репорт</a>
+  <a href="#faq">FAQ</a>
+</nav>
+
+<div class="wrap">
+
+  <!-- Зачем это нужно -->
+  <section id="benefits">
+    <div class="card">
+      <div class="sec-label">Ценность продукта</div>
+      <h2>Зачем нужен Coupang Bot</h2>
+
+      <p style="color:var(--muted2); font-size:13px; margin-bottom:20px; line-height:1.7;">Если вы продаёте товары на Coupang — вы знаете, как важна позиция в поиске. Раньше, чтобы узнать, на каком месте стоит ваш товар, нужно было вручную искать его среди десятков страниц. Coupang Bot делает это автоматически — быстро, точно и без вашего участия.</p>
+
+      <div class="benefits-grid">
+
+        <div class="benefit-card">
+          <div class="benefit-icon" style="background: rgba(34,197,94,0.12); color: var(--green);">🔍</div>
+          <div class="benefit-body">
+            <h4>Автоматический поиск позиции</h4>
+            <p>Бот сам открывает Coupang, вводит ключевое слово, применяет фильтры и находит точную позицию вашего товара в выдаче. То, что раньше занимало 10–15 минут вручную — теперь занимает секунды.</p>
+          </div>
+        </div>
+
+        <div class="benefit-card">
+          <div class="benefit-icon" style="background: rgba(41,176,232,0.12); color: var(--accent);">📦</div>
+          <div class="benefit-body">
+            <h4>До 10 товаров за один запуск</h4>
+            <p>Нет необходимости проверять каждый товар отдельно. Добавьте до 10 задач и запустите бота — он обработает все товары параллельно и покажет результаты в одной таблице.</p>
+          </div>
+        </div>
+
+        <div class="benefit-card">
+          <div class="benefit-icon" style="background: rgba(245,158,11,0.12); color: var(--warn);">⚡</div>
+          <div class="benefit-body">
+            <h4>Экономия времени каждый день</h4>
+            <p>Мониторинг позиций — это рутина, которая повторяется ежедневно. Бот избавляет вас от этой работы полностью. Запустил, посмотрел результаты, принял решение.</p>
+          </div>
+        </div>
+
+        <div class="benefit-card">
+          <div class="benefit-icon" style="background: rgba(34,197,94,0.12); color: var(--green);">📊</div>
+          <div class="benefit-body">
+            <h4>Чёткие результаты с позицией</h4>
+            <p>В разделе Results вы видите: по какому запросу искали, название товара и конкретная позиция. Никаких лишних данных — только то, что нужно для принятия решений.</p>
+          </div>
+        </div>
+
+        <div class="benefit-card">
+          <div class="benefit-icon" style="background: rgba(41,176,232,0.12); color: var(--accent);">🔒</div>
+          <div class="benefit-body">
+            <h4>Вход без пароля — через Telegram</h4>
+            <p>Никаких регистраций, форм и паролей. Авторизация — один клик через Telegram. Безопасно и удобно. Подписка привязана к вашему Telegram-аккаунту и работает на любом устройстве.</p>
+          </div>
+        </div>
+
+        <div class="benefit-card">
+          <div class="benefit-icon" style="background: rgba(239,68,68,0.12); color: var(--red);">🛡️</div>
+          <div class="benefit-body">
+            <h4>Работает как реальный пользователь</h4>
+            <p>Бот использует технологию управления браузером, которая имитирует действия живого человека. Это снижает риск блокировок и делает поиск надёжным даже при частых запусках.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="callout success" style="margin-top: 20px;">
+        <span class="ci">✅</span>
+        <div><strong>Итог:</strong> вы тратите 30 секунд вместо 30 минут, получаете точные данные по всем товарам и фокусируетесь на развитии продаж — а не на ручном мониторинге.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- О системе -->
+  <section id="about">
+    <div class="card">
+      <div class="sec-label">Обзор</div>
+      <h2>Из чего состоит система</h2>
+
+      <div class="intro-grid">
+        <div class="intro-card green">
+          <span class="ico">🖥️</span>
+          <h3>Приложение (Windows)</h3>
+          <p>Настольная программа Coupang Bot. Управляет задачами, запускает поиск товаров на Coupang и отображает результаты в реальном времени.</p>
+        </div>
+        <div class="intro-card">
+          <span class="ico">✈️</span>
+          <h3>Telegram-бот</h3>
+          <p>Авторизация и управление подпиской. Вход выполняется через Telegram — пароль не нужен. Продление подписки — через бота.</p>
+        </div>
+      </div>
+
+      <div class="callout info">
+        <span class="ci">ℹ️</span>
+        <div>Для входа в приложение нужен аккаунт Telegram. Без него авторизация невозможна.</div>
+      </div>
+
+      <div class="callout info" style="margin-top: 10px;">
+        <span class="ci">🌐</span>
+        <div>Интерфейс приложения доступен на <strong>двух языках — EN и RU</strong>. Переключатель находится в правом верхнем углу приложения. Язык меняется мгновенно без перезапуска.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Вход -->
+  <section id="signin">
+    <div class="card">
+      <div class="sec-label">Авторизация</div>
+      <h2>Первый вход в приложение</h2>
+
+      <div class="steps">
+
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <h3>Установите и запустите приложение</h3>
+            <p>Скачайте установщик <code>Coupang-Bot-Setup-x.x.x.exe</code> и установите его. После запуска откроется экран входа.</p>
+            <div class="callout warn">
+              <span class="ci">⚠️</span>
+              <div>Windows может показать предупреждение «Неизвестный разработчик». Нажмите <strong>«Всё равно запустить»</strong>.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <h3>Нажмите «Continue with Telegram»</h3>
+            <p>На экране входа нажмите большую синюю кнопку. Приложение откроет Telegram с запросом авторизации.</p>
+
+            <!-- Sign in mockup -->
+            <div class="signin-mock">
+              <div class="signin-logo-row">
+                <div class="signin-logo-box">[:]</div>
+                <div>
+                  <div class="signin-logo-text">Coupang Bot</div>
+                  <div class="signin-logo-sub">Automation Client</div>
+                </div>
+              </div>
+              <div class="signin-card">
+                <h4>Sign in to continue</h4>
+                <p>Coupang Bot uses Telegram for secure,<br>password-free login.</p>
+                <div class="tg-btn-big">✈ Continue with Telegram</div>
+                <div class="ready-row">
+                  <div class="ready-dot"></div>
+                  <div class="ready-text">
+                    <b>Ready</b>
+                    <span>Tap below to open Telegram and authorize this device.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <h3>Подтвердите вход в Telegram</h3>
+            <p>В Telegram нажмите <strong>«Start»</strong>. Бот ответит сообщением о подтверждении входа.</p>
+            <div class="callout success" style="margin-top: 12px;">
+              <span class="ci">✅</span>
+              <div><strong>«Вход выполнен! Вернитесь в приложение.»</strong> — это значит, что авторизация прошла успешно.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <h3>Вернитесь в приложение — доступ открыт</h3>
+            <p>Новым пользователям автоматически начисляется <strong>3 дня пробного периода</strong>. Приложение открывается на главном экране с задачами.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Задачи -->
+  <section id="tasks">
+    <div class="card">
+      <div class="sec-label">Основная работа</div>
+      <h2>Работа с задачами</h2>
+
+      <div class="steps">
+
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <h3>Создайте задачу — нажмите «+ New task»</h3>
+            <p>В левой панели нажмите <span class="fake-btn ghost" style="font-size:11px; padding:3px 10px; border-radius:4px;">+ New task</span> в шапке. Откроется форма для заполнения данных товара.</p>
+
+            <!-- Task list mockup -->
+            <div class="task-mock">
+              <div class="task-item">
+                <div class="task-content">
+                  <div class="task-keyword">강아지 장난감</div>
+                  <div class="task-name">그린홈 강아지 장난감 점프멜로디 따라볼 자동장난감, 1...</div>
+                  <div class="task-id">#t1</div>
+                </div>
+                <div class="task-badges">
+                  <span class="badge idle">● IDLE</span>
+                </div>
+              </div>
+              <div class="task-item">
+                <div class="task-content">
+                  <div class="task-keyword">고양이 화장실</div>
+                  <div class="task-name">그린홈 대형 항균 고양이 후드형 화장실+...</div>
+                  <div class="task-id">#t6</div>
+                </div>
+                <div class="task-badges">
+                  <span class="badge found">✓ FOUND</span>
+                  <span class="badge idle">● IDLE</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <h3>Заполните данные задачи</h3>
+            <p>Каждая задача — один товар для поиска. Заполните три поля:</p>
+
+            <div class="fields">
+              <div class="field-row">
+                <div class="field-name req">Keyword</div>
+                <div class="field-desc">Поисковый запрос на корейском — как вы бы ввели его на Coupang.<br>Пример: <code>강아지 장난감</code></div>
+              </div>
+              <div class="field-row">
+                <div class="field-name req">Product name</div>
+                <div class="field-desc">Название <strong>точно так, как оно написано на карточке товара</strong>. Откройте товар на Coupang и скопируйте название.<br>Пример: <code>그린홈 강아지 장난감 점프멜로디</code></div>
+              </div>
+              <div class="field-row">
+                <div class="field-name">Filters</div>
+                <div class="field-desc">Фильтры поиска через запятую, точно как написано на сайте.<br>Пример: <code>로켓, 공/볼</code></div>
+              </div>
+            </div>
+
+            <div class="callout danger">
+              <span class="ci">🔴</span>
+              <div><strong>Поле Product name — критически важное.</strong> Любое несовпадение с карточкой товара приводит к тому, что бот не находит товар.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <h3>Запустите бота — нажмите «Start bot»</h3>
+            <p>Кнопка находится в нижней панели слева. После нажатия бот начнёт обрабатывать задачи по очереди.</p>
+
+            <div class="btn-list">
+              <div class="btn-item">
+                <span class="fake-btn green">▷ Start bot</span>
+                <p>Запускает обработку всех задач со статусом IDLE</p>
+              </div>
+              <div class="btn-item">
+                <span class="fake-btn ghost">□ Stop</span>
+                <p>Останавливает бота после завершения текущей задачи</p>
+              </div>
+            </div>
+
+            <div class="callout warn">
+              <span class="ci">⚠️</span>
+              <div>Во время работы бота не взаимодействуйте с браузером, который он открывает. Вы можете просто <strong>свернуть его</strong> — бот продолжит работу в фоне.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <h3>Статусы задач</h3>
+            <div class="btn-list">
+              <div class="btn-item">
+                <span class="badge idle" style="padding: 4px 12px;">● IDLE</span>
+                <p>Задача ожидает запуска</p>
+              </div>
+              <div class="btn-item">
+                <span class="badge running" style="padding: 4px 12px;">● RUNNING</span>
+                <p>Бот сейчас обрабатывает эту задачу</p>
+              </div>
+              <div class="btn-item">
+                <span class="badge found" style="padding: 4px 12px;">✓ FOUND</span>
+                <p>Товар найден — позиция определена</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <h3>Задачи сохраняются автоматически</h3>
+            <p>Все добавленные задачи сохраняются между сессиями. <strong>Вам не нужно вводить товары заново</strong> при каждом запуске — они будут на месте при следующем открытии приложения.</p>
+            <div class="callout success">
+              <span class="ci">✅</span>
+              <div>Настройте задачи один раз и запускайте бота в любой момент — данные не сбросятся.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Расписание -->
+  <section id="schedule">
+    <div class="card">
+      <div class="sec-label">Автоматизация</div>
+      <h2>Scheduled Search — запуск по расписанию</h2>
+
+      <p style="color:var(--muted2); font-size:13px; margin-bottom:18px; line-height:1.7;">Coupang Bot умеет работать полностью автономно. Настройте расписание — и бот будет запускаться сам в фоне, без вашего участия. Вы можете даже закрыть окно приложения: бот останется в системном трее и выполнит поиск в назначенное время.</p>
+
+      <div class="steps">
+
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <h3>Откройте настройки расписания</h3>
+            <p>В нижней панели приложения нажмите иконку <strong>таймера / расписания</strong> рядом с кнопкой «Start bot». Откроется окно <strong>«Scheduled Search»</strong>.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <h3>Включите автозапуск и выберите интервал</h3>
+            <p>Поставьте галочку <strong>«Enable automatic scheduled runs»</strong> и выберите интервал из выпадающего списка.</p>
+
+            <!-- Schedule mockup -->
+            <div class="schedule-mock">
+              <div class="schedule-header">
+                <div class="schedule-title">Scheduled Search</div>
+                <div class="schedule-sub">Automatically run searches in the background</div>
+              </div>
+              <div class="schedule-body">
+                <div class="schedule-checkbox-row">
+                  <div class="schedule-check">✓</div>
+                  <span>Enable automatic scheduled runs</span>
+                </div>
+                <div class="schedule-label">Repeat every</div>
+                <div class="schedule-select">
+                  3 hours
+                  <span class="report-arrow">▾</span>
+                </div>
+                <div class="schedule-next">Next run in: <strong>3h 16m</strong></div>
+                <div class="schedule-footer">
+                  <button class="report-btn-cancel">Cancel</button>
+                  <button class="report-btn-send">Save</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="interval-list">
+              <div class="interval-item"><span class="interval-val">30 min</span><span class="interval-desc">— частый мониторинг</span></div>
+              <div class="interval-item"><span class="interval-val">1 hour</span><span class="interval-desc">— каждый час</span></div>
+              <div class="interval-item"><span class="interval-val">3 hours</span><span class="interval-desc">— рекомендуется для ежедневного отслеживания</span></div>
+              <div class="interval-item"><span class="interval-val">6 / 12 hours</span><span class="interval-desc">— редкий мониторинг</span></div>
+              <div class="interval-item"><span class="interval-val">24 hours</span><span class="interval-desc">— раз в сутки</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <h3>Нажмите «Save» и сверните приложение</h3>
+            <p>После сохранения приложение можно <strong>свернуть или закрыть в трей</strong> — оно останется работать в фоне. В назначенное время бот запустится автоматически, выполнит все задачи и обновит результаты.</p>
+            <div class="callout info">
+              <span class="ci">ℹ️</span>
+              <div>Иконка бота появится в системном трее (панель задач, правый нижний угол). Нажмите на неё, чтобы открыть приложение и посмотреть результаты последнего запуска.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Логи -->
+  <section id="logs">
+    <div class="card">
+      <div class="sec-label">Мониторинг</div>
+      <h2>Live Log и результаты</h2>
+
+      <p style="color: var(--muted2); font-size: 13px; margin-bottom: 16px;">Правая панель приложения показывает два раздела: <strong style="color:var(--text);">Live Log</strong> — лог событий в реальном времени, и <strong style="color:var(--text);">Results</strong> — итоги поиска.</p>
+
+      <!-- Log mockup -->
+      <div class="screen-mock">
+        <div class="mock-bar">
+          <div class="mock-bar-left">
+            <b>Live Log</b>
+            <span style="background:var(--accent-dim); color:var(--accent); font-size:10px; padding:1px 7px; border-radius:100px; border: 1px solid var(--accent)30;">2</span>
+            <span style="margin-left:8px;">Results</span>
+            <span style="background:var(--card); border:1px solid var(--border2); font-size:10px; padding:1px 7px; border-radius:100px;">1</span>
+          </div>
+          <div style="display:flex; gap:8px; font-size:11px;">
+            <span style="background:var(--card); border:1px solid var(--border2); padding:2px 9px; border-radius:4px; color:var(--text);">ALL</span>
+            <span>INFO 2</span>
+            <span>WARN 0</span>
+            <span>ERROR 0</span>
+            <span>SUCCESS 0</span>
+          </div>
+        </div>
+        <div class="mock-body">
+          <div class="log-mock" style="margin-top:0; border:none; padding:6px 0;">
+            <div class="log-row">
+              <span class="log-time">20:17:09</span>
+              <span class="log-level info">INFO</span>
+              <span class="log-src">[system]</span>
+              <span class="log-msg">Bot ready. Add tasks and press Start.</span>
+            </div>
+            <div class="log-row">
+              <span class="log-time">20:17:10</span>
+              <span class="log-level info">INFO</span>
+              <span class="log-src">[system]</span>
+              <span class="log-msg">Session loaded from userData.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider"/>
+
+      <h3 style="color:var(--text); margin-bottom: 10px;">Фильтры уровней логов</h3>
+      <div class="btn-list">
+        <div class="btn-item">
+          <span style="font-size:11px; font-weight:700; color:var(--accent); width:60px;">INFO</span>
+          <p>Штатные сообщения о ходе работы бота</p>
+        </div>
+        <div class="btn-item">
+          <span style="font-size:11px; font-weight:700; color:var(--warn); width:60px;">WARN</span>
+          <p>Предупреждения — не критично, но стоит обратить внимание</p>
+        </div>
+        <div class="btn-item">
+          <span style="font-size:11px; font-weight:700; color:var(--red); width:60px;">ERROR</span>
+          <p>Ошибки — задача не выполнена, нужна проверка</p>
+        </div>
+        <div class="btn-item">
+          <span style="font-size:11px; font-weight:700; color:var(--green); width:60px;">SUCCESS</span>
+          <p>Товар успешно найден, позиция определена</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Подписка -->
+  <section id="subscription">
+    <div class="card">
+      <div class="sec-label">Аккаунт</div>
+      <h2>Подписка</h2>
+
+      <p style="color:var(--muted2); font-size:13px; margin-bottom:4px;">Просмотреть статус подписки можно в шапке приложения → <strong style="color:var(--text);">Subscription</strong>.</p>
+
+      <!-- Sub mockup -->
+      <div class="sub-card">
+        <div class="sub-header">
+          <div class="sub-icon">👑</div>
+          <div>
+            <div class="sub-plan">Pro Plan <span class="sub-active">● ACTIVE</span></div>
+            <div class="sub-price">₩10,000 · billed monthly</div>
+          </div>
+        </div>
+        <div class="sub-row"><span class="label">Status</span>        <span class="val active">Active</span></div>
+        <div class="sub-row"><span class="label">Renews on</span>     <span class="val">May 30, 2027</span></div>
+        <div class="sub-row"><span class="label">Days remaining</span><span class="val">376 days</span></div>
+        <div class="sub-row"><span class="label">Concurrent tasks</span><span class="val">10</span></div>
+      </div>
+
+      <hr class="divider"/>
+
+      <h3 style="color:var(--text); margin-bottom: 12px;">Статусы подписки</h3>
+      <div class="status-grid">
+        <div class="status-card">
+          <span class="sico">🟡</span>
+          <h4>Trial</h4>
+          <p>3 дня пробного доступа при первой регистрации</p>
+        </div>
+        <div class="status-card">
+          <span class="sico">✅</span>
+          <h4>Active</h4>
+          <p>Полный доступ. Показывается дата окончания</p>
+        </div>
+        <div class="status-card">
+          <span class="sico">❌</span>
+          <h4>Expired</h4>
+          <p>Доступ закрыт. Нужно продлить подписку</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Оплата -->
+  <section id="payment">
+    <div class="card">
+      <div class="sec-label">Продление</div>
+      <h2>Как оплатить подписку</h2>
+
+      <p style="color:var(--muted2); font-size:13px; margin-bottom:4px;">В приложении нажмите <strong style="color:var(--text);">Subscription → Extend via Telegram</strong> или откройте Telegram-бот и нажмите <strong style="color:var(--text);">💳 Оплатить подписку</strong>.</p>
+
+      <div class="pay-grid">
+        <div class="pay-card">
+          <h4>🏦 Toss Bank (перевод)</h4>
+          <ol>
+            <li>Нажмите «Оплатить подписку» в боте</li>
+            <li>Выберите <strong>«Toss Bank Korea»</strong></li>
+            <li>Бот покажет реквизиты и уникальный <strong>код-memo</strong></li>
+            <li>Переведите сумму, в поле <em>받는분 통장표시</em> укажите код точно</li>
+            <li>Нажмите <strong>«✅ Я оплатил»</strong></li>
+            <li>Ожидайте подтверждения администратора</li>
+          </ol>
+          <div class="callout warn" style="margin-top: 12px;">
+            <span class="ci">⚠️</span>
+            <div>Код memo должен совпадать <strong>точно</strong>. Без него платёж невозможно идентифицировать.</div>
+          </div>
+        </div>
+
+        <div class="pay-card" style="opacity: 0.7;">
+          <h4>⭐ Telegram Stars <span style="font-size:11px; font-weight:500; color:var(--warn); background:var(--warn-dim); border:1px solid var(--warn-bdr); padding:2px 8px; border-radius:100px; margin-left:4px;">пока не поддерживается</span></h4>
+          <ol>
+            <li>Нажмите «Оплатить подписку» в боте</li>
+            <li>Выберите <strong>«Telegram»</strong></li>
+            <li>Оплатите через встроенный интерфейс</li>
+            <li>Подписка активируется <strong>автоматически</strong></li>
+          </ol>
+          <div class="callout warn" style="margin-top: 12px;">
+            <span class="ci">⚠️</span>
+            <div>Этот способ оплаты временно недоступен. Используйте Toss Bank.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Баг-репорт -->
+  <section id="bugreport">
+    <div class="card">
+      <div class="sec-label">Поддержка</div>
+      <h2>Сообщить об ошибке — Report a Problem</h2>
+
+      <p style="color:var(--muted2); font-size:13px; margin-bottom:18px; line-height:1.7;">Если что-то пошло не так — не закрывайте приложение сразу. Используйте встроенную форму отчёта об ошибке. К вашему сообщению автоматически прикрепятся последние 50 строк лога — это сильно ускоряет диагностику.</p>
+
+      <div class="steps">
+
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <h3>Откройте форму отчёта</h3>
+            <p>В нижней панели приложения нажмите иконку <strong>⚠ треугольника с восклицательным знаком</strong> рядом со статусом бота. Откроется окно <strong>«Report a Problem»</strong>.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <h3>Выберите тип проблемы</h3>
+            <p>В поле <strong>«Problem type»</strong> выберите из списка наиболее подходящий тип:</p>
+
+            <!-- Report mockup -->
+            <div class="report-mock">
+              <div class="report-header">
+                <span class="report-warn-icon">⚠</span>
+                <div>
+                  <div class="report-title">Report a Problem</div>
+                  <div class="report-sub">Describe what happened — your last 50 log lines will be attached automatically.</div>
+                </div>
+              </div>
+              <div class="report-body">
+                <label class="report-label">Problem type</label>
+                <div class="report-select">
+                  Bot stuck / not responding
+                  <span class="report-arrow">▾</span>
+                </div>
+                <label class="report-label" style="margin-top:14px;">What happened?</label>
+                <div class="report-textarea">Describe the problem in as much detail as possible…</div>
+                <div class="report-footer">
+                  <span class="report-esc"><span>Esc</span> to cancel</span>
+                  <div class="report-btns">
+                    <button class="report-btn-cancel">Cancel</button>
+                    <button class="report-btn-send">Send report</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="problem-types">
+              <div class="problem-type-item"><span class="pt-dot"></span><span>Bot stuck / not responding</span><span class="pt-desc">— бот завис и не реагирует</span></div>
+              <div class="problem-type-item"><span class="pt-dot"></span><span>Task not completing</span><span class="pt-desc">— задача не завершается</span></div>
+              <div class="problem-type-item"><span class="pt-dot"></span><span>Wrong result / position</span><span class="pt-desc">— неверная позиция товара</span></div>
+              <div class="problem-type-item"><span class="pt-dot"></span><span>Browser / UI issue</span><span class="pt-desc">— проблема с браузером или интерфейсом</span></div>
+              <div class="problem-type-item"><span class="pt-dot"></span><span>Other</span><span class="pt-desc">— другая проблема</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <h3>Подробно опишите проблему</h3>
+            <p>В поле <strong>«What happened?»</strong> напишите как можно подробнее. Чем больше деталей — тем быстрее мы найдём и исправим ошибку. Укажите:</p>
+
+            <div class="checklist">
+              <div class="check-item"><span class="check-dot green-dot"></span><span>Что именно вы делали перед тем, как возникла проблема</span></div>
+              <div class="check-item"><span class="check-dot green-dot"></span><span>Какой товар (keyword / product name) вы искали</span></div>
+              <div class="check-item"><span class="check-dot green-dot"></span><span>Что отображалось на экране в момент ошибки</span></div>
+              <div class="check-item"><span class="check-dot green-dot"></span><span>Повторяется ли ошибка — или произошла один раз</span></div>
+              <div class="check-item"><span class="check-dot green-dot"></span><span>Что делал браузер (открылся, закрылся, завис)</span></div>
+              <div class="check-item"><span class="check-dot green-dot"></span><span>Какой статус показывала задача в момент проблемы</span></div>
+            </div>
+
+            <div class="callout info" style="margin-top:14px;">
+              <span class="ci">ℹ️</span>
+              <div>Последние 50 строк лога прикрепятся к отчёту <strong>автоматически</strong>. Вам не нужно копировать их вручную.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <h3>Нажмите «Send report»</h3>
+            <p>Отчёт уйдёт к разработчикам. Мы свяжемся с вами через Telegram-бот. Убедитесь, что бот не заблокирован в вашем Telegram.</p>
+            <div class="callout warn">
+              <span class="ci">⚠️</span>
+              <div>Не закрывайте приложение сразу после ошибки — подождите, пока отчёт отправится. Закрытие может привести к потере логов.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq">
+    <div class="card">
+      <div class="sec-label">Частые вопросы</div>
+      <h2>FAQ</h2>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggle(this)">Бот не находит товар — статус не меняется на FOUND. <span class="arr">▼</span></div>
+        <div class="faq-a">Проблема чаще всего в поле <strong>Product name</strong>. Откройте карточку товара на Coupang, скопируйте название и вставьте без изменений. Любой лишний символ или пробел — и бот не распознает товар.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggle(this)">Приложение не даёт запустить бота — говорит об истёкшей подписке. <span class="arr">▼</span></div>
+        <div class="faq-a">Откройте Telegram-бот и нажмите <strong>💳 Оплатить подписку</strong> или в приложении перейдите в <strong>Subscription → Extend via Telegram</strong>. После оплаты и подтверждения приложение обновится автоматически.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggle(this)">Браузер открылся и сразу закрылся. Что произошло? <span class="arr">▼</span></div>
+        <div class="faq-a">Откройте вкладку <strong>Live Log</strong> в правой панели и отфильтруйте по <strong>ERROR</strong>. Там будет описание проблемы. Если непонятно — свяжитесь с поддержкой через бот: нажмите <strong>❓ Помощь</strong>.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggle(this)">Сколько задач можно запустить одновременно? <span class="arr">▼</span></div>
+        <div class="faq-a">Количество одновременных задач указано в разделе <strong>Subscription → Concurrent tasks</strong>. На Pro Plan это <strong>10 задач</strong>. Бот обрабатывает их параллельно.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggle(this)">Перевёл деньги через Toss, но подписка не активировалась. <span class="arr">▼</span></div>
+        <div class="faq-a">
+          Оплата через Toss проверяется вручную администратором. Убедитесь, что:<br><br>
+          1. Вы нажали <strong>«✅ Я оплатил»</strong> в боте после перевода.<br>
+          2. Указали код memo точно так, как показал бот.<br><br>
+          Если прошло много времени — нажмите <strong>❓ Помощь</strong> в Telegram-боте.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggle(this)">Как войти в приложение на новом устройстве? <span class="arr">▼</span></div>
+        <div class="faq-a">Установите приложение, откройте его и нажмите <strong>Continue with Telegram</strong>. Процедура входа такая же, как при первой регистрации. Подписка привязана к вашему Telegram-аккаунту — она сохранится.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggle(this)">Где найти поддержку? <span class="arr">▼</span></div>
+        <div class="faq-a">В Telegram-боте нажмите кнопку <strong>❓ Помощь</strong> — ваш запрос будет передан администратору. Также можно написать напрямую: <strong>@coupangbot_support</strong>.</div>
+      </div>
+
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <div class="footer-logo">
+    <div class="logo-icon" style="width:24px;height:24px;font-size:10px;">[:]</div>
+    Coupang Bot
+  </div>
+  <span>Разработано в Южной Корее</span>
+</footer>
+
+<script>
+  function toggle(el) {
+    el.parentElement.classList.toggle('open');
+  }
+</script>
+
+</body>
+</html>
