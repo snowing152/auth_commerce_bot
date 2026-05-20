@@ -241,28 +241,75 @@ bot.onText(/статус подписки/i, async (msg) => {
 });
 
 // ── Help ─────────────────────────────────────────────────────
+// Two-step ticket flow: user presses "❓ Помощь" → bot asks to describe the
+// problem → the user's next message (text or photo) is bundled and sent to
+// the support chat. State is kept in-memory; lost on restart, which is fine
+// for a one-shot flow.
+const pendingHelp = new Set<number>();
+
 bot.onText(/помощь/i, async (msg) => {
   if (msg.chat.type !== "private") return;
   if (SUPPORT_CHAT_ID === null) return;
+  pendingHelp.add(msg.from!.id);
+  await bot.sendMessage(
+    msg.chat.id,
+    "✍️ <b>Опишите вашу проблему</b> одним сообщением.\nМожно приложить скриншот.\n\nДля отмены отправьте /отмена.",
+    { parse_mode: "HTML" },
+  );
+});
 
-  const u = msg.from!;
+bot.onText(/^\/отмена$/i, async (msg) => {
+  if (msg.chat.type !== "private") return;
+  if (!pendingHelp.has(msg.from!.id)) return;
+  pendingHelp.delete(msg.from!.id);
+  await bot.sendMessage(msg.chat.id, "❌ Запрос отменён.", mainKeyboard());
+});
+
+// Collect the user's problem description and forward it to the support chat.
+bot.on("message", async (msg) => {
+  if (msg.chat.type !== "private") return;
+  if (SUPPORT_CHAT_ID === null) return;
+  if (!msg.from || !pendingHelp.has(msg.from.id)) return;
+  // Let nav buttons and slash commands pass through to their own handlers.
+  if (msg.text && /^(📊|💳|📖|❓|\/)/.test(msg.text)) return;
+  if (!msg.text && !msg.photo) return;
+
+  pendingHelp.delete(msg.from.id);
+
+  const u = msg.from;
   const userLabel = u.username
     ? `@${u.username}`
     : `${u.first_name}${u.last_name ? " " + u.last_name : ""}`;
+  const header = `🆘 <b>Запрос помощи</b>\n\nПользователь: <b>${htmlEscape(userLabel)}</b>\nUser-ID: <code>${u.id}</code>\n\n<i>Ответьте reply на это сообщение — бот перешлёт текст пользователю.</i>`;
 
-  // Forward support request to the shared support chat with a User-ID marker
-  // so admins can reply via Telegram-reply and the bot can route it back.
-  await bot.sendMessage(
-    SUPPORT_CHAT_ID,
-    `🆘 <b>Запрос помощи</b>\n\nПользователь: <b>${htmlEscape(userLabel)}</b>\nUser-ID: <code>${u.id}</code>\n\n<i>Ответьте reply на это сообщение — бот перешлёт текст пользователю.</i>`,
-    { parse_mode: "HTML" },
-  );
-
-  await bot.sendMessage(
-    msg.chat.id,
-    "✅ Ваш запрос отправлен. Ожидайте ответа.",
-    mainKeyboard(),
-  );
+  try {
+    if (msg.photo && msg.photo.length > 0) {
+      const largest = msg.photo[msg.photo.length - 1];
+      const captionText = msg.caption ? `\n\n📝 ${htmlEscape(msg.caption)}` : "";
+      await bot.sendPhoto(SUPPORT_CHAT_ID, largest.file_id, {
+        caption: `${header}${captionText}`,
+        parse_mode: "HTML",
+      });
+    } else if (msg.text) {
+      await bot.sendMessage(
+        SUPPORT_CHAT_ID,
+        `${header}\n\n📝 ${htmlEscape(msg.text)}`,
+        { parse_mode: "HTML" },
+      );
+    }
+    await bot.sendMessage(
+      msg.chat.id,
+      "✅ Ваш запрос отправлен. Ожидайте ответа.",
+      mainKeyboard(),
+    );
+  } catch (e) {
+    console.error("[help-forward] failed:", e);
+    await bot.sendMessage(
+      msg.chat.id,
+      "❌ Не удалось отправить запрос. Попробуйте позже.",
+      mainKeyboard(),
+    );
+  }
 });
 
 // Relay admin replies from the support chat to the original user as the bot.
