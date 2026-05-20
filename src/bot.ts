@@ -126,10 +126,13 @@ bot.onText(/\/start(?:\s+login_(.+))?/, async (msg, match) => {
     );
   }
 
-  // Login flow — verify token from Supabase (must still be unconfirmed)
+  // Login flow — verify token from Supabase (must still be unconfirmed).
+  // Use server-set created_at + 5min instead of client-written expires_at
+  // because the web app fills expires_at from the user's local clock,
+  // which can drift and produce already-expired values.
   const { data, error } = await supabase
     .from("auth_tokens")
-    .select("token, expires_at, confirmed")
+    .select("token, created_at, confirmed")
     .eq("token", token)
     .eq("confirmed", false)
     .single();
@@ -138,7 +141,8 @@ bot.onText(/\/start(?:\s+login_(.+))?/, async (msg, match) => {
     return bot.sendMessage(chatId, "❌ Ссылка недействительна.");
   }
 
-  if (new Date(data.expires_at) < new Date()) {
+  const expiresAtMs = new Date(data.created_at).getTime() + 5 * 60_000;
+  if (expiresAtMs < Date.now()) {
     return bot.sendMessage(chatId, "❌ Ссылка устарела. Войдите снова.");
   }
 
