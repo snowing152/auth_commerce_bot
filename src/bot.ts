@@ -657,3 +657,21 @@ bot.on("successful_payment", async (msg) => {
 
 bot.on("polling_error", (err) => console.error("[polling]", err.message));
 console.log("🤖 Coupang Bot started.");
+
+/**
+ * Graceful shutdown on SIGTERM (sent by Railway during redeploy).
+ * Ensures polling stops cleanly before the process exits.
+ */
+process.on('SIGTERM', () => {
+  console.log('SIGTERM received. Stopping bot polling...');
+
+  bot.stopPolling()
+    .then(() => {
+      console.log('Polling stopped. Exiting.');
+      process.exit(0);
+    })
+    .catch((err) => {
+      console.error('Error stopping polling:', err);
+      process.exit(1);
+    });
+});
