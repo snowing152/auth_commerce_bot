@@ -14,15 +14,27 @@ const STARS_AMOUNT = Number(process.env.STARS_AMOUNT || 330);
 const SUBSCRIPTION_PRICE_KRW = Number(process.env.SUBSCRIPTION_PRICE_KRW || 10000);
 
 // Toss Bank manual-transfer flow (admin-approved, no merchant API)
-const ADMIN_TELEGRAM_ID = process.env.ADMIN_TELEGRAM_ID
-  ? Number(process.env.ADMIN_TELEGRAM_ID)
+const ADMIN_TELEGRAM_IDS: number[] = (
+  process.env.ADMIN_TELEGRAM_IDS ||
+  process.env.ADMIN_TELEGRAM_ID ||
+  ""
+)
+  .split(",")
+  .map((s) => Number(s.trim()))
+  .filter((n) => Number.isFinite(n) && n > 0);
+const SUPPORT_CHAT_ID = process.env.SUPPORT_CHAT_ID
+  ? Number(process.env.SUPPORT_CHAT_ID)
   : null;
 const TOSS_BANK_NAME = process.env.TOSS_BANK_NAME || "토스뱅크";
 const TOSS_ACCOUNT_NUMBER = process.env.TOSS_ACCOUNT_NUMBER || "";
 const TOSS_ACCOUNT_HOLDER = process.env.TOSS_ACCOUNT_HOLDER || "";
 const TOSS_PRICE_KRW = Number(process.env.TOSS_PRICE_KRW || 10000);
 const TOSS_DAYS = Number(process.env.TOSS_DAYS || 30);
-const TOSS_ENABLED = ADMIN_TELEGRAM_ID !== null && TOSS_ACCOUNT_NUMBER !== "";
+const TOSS_ENABLED = SUPPORT_CHAT_ID !== null && TOSS_ACCOUNT_NUMBER !== "";
+
+function isAdmin(userId: number): boolean {
+  return ADMIN_TELEGRAM_IDS.includes(userId);
+}
 
 const INSTRUCTION_PATH = path.join(__dirname, "../instruction.html");
 
@@ -191,11 +203,13 @@ bot.onText(/\/start(?:\s+login_(.+))?/, async (msg, match) => {
 });
 
 bot.onText(/инструкция/i, async (msg) => {
+  if (msg.chat.type !== "private") return;
   await sendInstruction(msg.chat.id);
 });
 
 // ── Status ───────────────────────────────────────────────────
 bot.onText(/статус подписки/i, async (msg) => {
+  if (msg.chat.type !== "private") return;
   const { data: user } = await supabase
     .from("users")
     .select("subscription_status, trial_end, subscription_end")
@@ -228,25 +242,60 @@ bot.onText(/статус подписки/i, async (msg) => {
 
 // ── Help ─────────────────────────────────────────────────────
 bot.onText(/помощь/i, async (msg) => {
-  if (!ADMIN_TELEGRAM_ID) return;
+  if (msg.chat.type !== "private") return;
+  if (SUPPORT_CHAT_ID === null) return;
 
   const u = msg.from!;
   const userLabel = u.username
     ? `@${u.username}`
     : `${u.first_name}${u.last_name ? " " + u.last_name : ""}`;
 
-  // Forward support request to admin with user info
+  // Forward support request to the shared support chat with a User-ID marker
+  // so admins can reply via Telegram-reply and the bot can route it back.
   await bot.sendMessage(
-    ADMIN_TELEGRAM_ID,
-    `🆘 <b>Запрос помощи</b>\n\nПользователь: <b>${htmlEscape(userLabel)}</b>\nID: <code>${u.id}</code>`,
+    SUPPORT_CHAT_ID,
+    `🆘 <b>Запрос помощи</b>\n\nПользователь: <b>${htmlEscape(userLabel)}</b>\nUser-ID: <code>${u.id}</code>\n\n<i>Ответьте reply на это сообщение — бот перешлёт текст пользователю.</i>`,
     { parse_mode: "HTML" },
   );
 
   await bot.sendMessage(
     msg.chat.id,
-    "✅ Ваш запрос отправлен администратору. Ожидайте ответа.",
+    "✅ Ваш запрос отправлен. Ожидайте ответа.",
     mainKeyboard(),
   );
+});
+
+// Relay admin replies from the support chat to the original user as the bot.
+bot.on("message", async (msg) => {
+  if (SUPPORT_CHAT_ID === null) return;
+  if (msg.chat.id !== SUPPORT_CHAT_ID) return;
+  if (!msg.reply_to_message) return;
+  if (!msg.from || !isAdmin(msg.from.id)) return;
+  if (!msg.text || msg.text.startsWith("/")) return;
+
+  const replyText =
+    msg.reply_to_message.text || msg.reply_to_message.caption || "";
+  const match = replyText.match(/User-ID:\s*(\d+)/);
+  if (!match) return;
+
+  const targetUserId = Number(match[1]);
+  try {
+    await bot.sendMessage(
+      targetUserId,
+      `💬 <b>Ответ поддержки:</b>\n\n${htmlEscape(msg.text)}`,
+      { parse_mode: "HTML" },
+    );
+    await bot.sendMessage(msg.chat.id, "✅ Отправлено пользователю.", {
+      reply_to_message_id: msg.message_id,
+    });
+  } catch (e) {
+    console.error("[support-relay] failed:", e);
+    await bot.sendMessage(
+      msg.chat.id,
+      "❌ Не удалось доставить (юзер заблокировал бота?).",
+      { reply_to_message_id: msg.message_id },
+    );
+  }
 });
 
 // ── Payment ──────────────────────────────────────────────────
@@ -275,6 +324,7 @@ async function sendTelegramInvoice(chatId: number, fromId: number) {
 }
 
 bot.onText(/оплатить подписку/i, async (msg) => {
+  if (msg.chat.type !== "private") return;
   const chatId = msg.chat.id;
 
   const inline_keyboard: TelegramBot.InlineKeyboardButton[][] = [];
@@ -401,7 +451,7 @@ async function handleUserClaim(
       .select("id")
       .single();
 
-    if (updated && ADMIN_TELEGRAM_ID !== null) {
+    if (updated && SUPPORT_CHAT_ID !== null) {
       const u = query.from;
       const userLabel = u.username
         ? `@${u.username}`
@@ -414,7 +464,7 @@ async function handleUserClaim(
         `Дней: <b>${order.days}</b>`,
         `Memo: <code>${order.memo}</code>`,
       ].join("\n");
-      await bot.sendMessage(ADMIN_TELEGRAM_ID, adminText, {
+      await bot.sendMessage(SUPPORT_CHAT_ID, adminText, {
         parse_mode: "HTML",
         reply_markup: {
           inline_keyboard: [
@@ -440,8 +490,8 @@ async function handleAdminDecision(
   orderId: string,
   decision: "approved" | "rejected",
 ) {
-  if (ADMIN_TELEGRAM_ID === null || query.from.id !== ADMIN_TELEGRAM_ID) {
-    await bot.answerCallbackQuery(query.id);
+  if (!isAdmin(query.from.id)) {
+    await bot.answerCallbackQuery(query.id, { text: "Только для админов" });
     return;
   }
 
@@ -485,7 +535,7 @@ async function handleAdminDecision(
 
     if (query.message) {
       await bot.editMessageText(
-        `✅ <b>Approved</b> — order <code>${updated.memo}</code>`,
+        `✅ <b>Approved</b> by ${htmlEscape(query.from.first_name)} — order <code>${updated.memo}</code>`,
         {
           chat_id: query.message.chat.id,
           message_id: query.message.message_id,
@@ -500,7 +550,7 @@ async function handleAdminDecision(
     );
     if (query.message) {
       await bot.editMessageText(
-        `❌ <b>Rejected</b> — order <code>${updated.memo}</code>`,
+        `❌ <b>Rejected</b> by ${htmlEscape(query.from.first_name)} — order <code>${updated.memo}</code>`,
         {
           chat_id: query.message.chat.id,
           message_id: query.message.message_id,
