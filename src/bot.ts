@@ -7,13 +7,23 @@ import * as crypto from "crypto";
 
 dotenv.config({ path: path.join(__dirname, "../.env") });
 
+// ── Env validation ──────────────────────────────────────────────
+for (const key of ["BOT_TOKEN", "SUPABASE_URL", "SUPABASE_SERVICE_KEY"]) {
+  if (!process.env[key]) throw new Error(`Missing required env var: ${key}`);
+}
+
+// ── Constants ───────────────────────────────────────────────────
+const TOKEN_TTL_MS = 5 * 60_000;
+const TRIAL_DAYS = 3;
+const PENDING_HELP_TTL_MS = 30 * 60_000;
+const MEMO_RETRIES = 5;
+
 const BOT_TOKEN = process.env.BOT_TOKEN!;
 const PAYMENT_PROVIDER_TOKEN = process.env.PAYMENT_PROVIDER_TOKEN || "";
 const SUBSCRIPTION_DAYS = Number(process.env.SUBSCRIPTION_DAYS || 30);
-const STARS_AMOUNT = Number(process.env.STARS_AMOUNT || 330);
-const SUBSCRIPTION_PRICE_KRW = Number(process.env.SUBSCRIPTION_PRICE_KRW || 10000);
+const STARS_AMOUNT = Number(process.env.STARS_AMOUNT || 300);
+const SUBSCRIPTION_PRICE_KRW = Number(process.env.SUBSCRIPTION_PRICE_KRW || 9900);
 
-// Toss Bank manual-transfer flow (admin-approved, no merchant API)
 const ADMIN_TELEGRAM_IDS: number[] = (
   process.env.ADMIN_TELEGRAM_IDS ||
   process.env.ADMIN_TELEGRAM_ID ||
@@ -22,15 +32,24 @@ const ADMIN_TELEGRAM_IDS: number[] = (
   .split(",")
   .map((s) => Number(s.trim()))
   .filter((n) => Number.isFinite(n) && n > 0);
-const SUPPORT_CHAT_ID = process.env.SUPPORT_CHAT_ID
-  ? Number(process.env.SUPPORT_CHAT_ID)
-  : null;
+
+// Guard against NaN from malformed env (Number("abc") === NaN, NaN !== null is true)
+const rawSupportChatId = Number(process.env.SUPPORT_CHAT_ID);
+const SUPPORT_CHAT_ID: number | null =
+  Number.isFinite(rawSupportChatId) && rawSupportChatId !== 0
+    ? rawSupportChatId
+    : null;
+
 const TOSS_BANK_NAME = process.env.TOSS_BANK_NAME || "토스뱅크";
 const TOSS_ACCOUNT_NUMBER = process.env.TOSS_ACCOUNT_NUMBER || "";
 const TOSS_ACCOUNT_HOLDER = process.env.TOSS_ACCOUNT_HOLDER || "";
-const TOSS_PRICE_KRW = Number(process.env.TOSS_PRICE_KRW || 10000);
+const TOSS_PRICE_KRW = Number(process.env.TOSS_PRICE_KRW || 9900);
 const TOSS_DAYS = Number(process.env.TOSS_DAYS || 30);
-const TOSS_ENABLED = SUPPORT_CHAT_ID !== null && TOSS_ACCOUNT_NUMBER !== "";
+// Require a valid support chat AND at least one admin — otherwise approvals are impossible
+const TOSS_ENABLED =
+  SUPPORT_CHAT_ID !== null &&
+  TOSS_ACCOUNT_NUMBER !== "" &&
+  ADMIN_TELEGRAM_IDS.length > 0;
 
 function isAdmin(userId: number): boolean {
   return ADMIN_TELEGRAM_IDS.includes(userId);
@@ -38,7 +57,7 @@ function isAdmin(userId: number): boolean {
 
 const INSTRUCTION_PATH = path.join(__dirname, "../instruction.html");
 
-// ── Supabase (service key — server only) ────────────────────
+// ── Supabase (service key — server only) ────────────────────────
 const supabase = createClient(
   process.env.SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_KEY!,
@@ -46,7 +65,7 @@ const supabase = createClient(
 
 const bot = new TelegramBot(BOT_TOKEN, { polling: true });
 
-// ── Helpers ─────────────────────────────────────────────────
+// ── Helpers ─────────────────────────────────────────────────────
 function mainKeyboard() {
   return {
     reply_markup: {
@@ -70,7 +89,11 @@ function fmtDate(iso: string): string {
 }
 
 function htmlEscape(s: string): string {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
 // 6-char uppercase memo, no easily-confused chars (0/O, 1/I, etc.)
@@ -100,31 +123,17 @@ async function extendSubscription(
   telegramId: number,
   days: number,
 ): Promise<string> {
-  const { data: user } = await supabase
-    .from("users")
-    .select("subscription_end")
-    .eq("telegram_id", telegramId)
-    .single();
-
-  const base = user?.subscription_end
-    ? new Date(Math.max(Date.now(), new Date(user.subscription_end).getTime()))
-    : new Date();
-
-  const newEnd = new Date(base.getTime() + days * 86400_000);
-
-  await supabase
-    .from("users")
-    .update({
-      subscription_status: "active",
-      subscription_end: newEnd.toISOString(),
-    })
-    .eq("telegram_id", telegramId);
-
-  return newEnd.toISOString();
+  const { data, error } = await supabase.rpc("extend_subscription", {
+    p_telegram_id: telegramId,
+    p_days: days,
+  });
+  if (error) throw error;
+  return data as string;
 }
 
-// ── /start ───────────────────────────────────────────────────
-bot.onText(/\/start(?:\s+login_(.+))?/, async (msg, match) => {
+// ── /start ───────────────────────────────────────────────────────
+// Token capture uses \S+ to prevent injecting extra words via a crafted deep-link.
+bot.onText(/^\/start(?:\s+login_(\S+))?$/, async (msg, match) => {
   const chatId = msg.chat.id;
   const token = match?.[1];
   const tgUser = msg.from!;
@@ -153,8 +162,7 @@ bot.onText(/\/start(?:\s+login_(.+))?/, async (msg, match) => {
     return bot.sendMessage(chatId, "❌ Ссылка недействительна.");
   }
 
-  const expiresAtMs = new Date(data.created_at).getTime() + 5 * 60_000;
-  if (expiresAtMs < Date.now()) {
+  if (new Date(data.created_at).getTime() + TOKEN_TTL_MS < Date.now()) {
     return bot.sendMessage(chatId, "❌ Ссылка устарела. Войдите снова.");
   }
 
@@ -175,7 +183,7 @@ bot.onText(/\/start(?:\s+login_(.+))?/, async (msg, match) => {
       username: tgUser.username || null,
       subscription_status: "trial",
       trial_start: now.toISOString(),
-      trial_end: new Date(now.getTime() + 3 * 86400_000).toISOString(),
+      trial_end: new Date(now.getTime() + TRIAL_DAYS * 86400_000).toISOString(),
     });
   }
 
@@ -202,13 +210,14 @@ bot.onText(/\/start(?:\s+login_(.+))?/, async (msg, match) => {
   }
 });
 
-bot.onText(/инструкция/i, async (msg) => {
+// Match exact keyboard button text to prevent spurious triggers from user messages.
+bot.onText(/^📖 Инструкция$/, async (msg) => {
   if (msg.chat.type !== "private") return;
   await sendInstruction(msg.chat.id);
 });
 
-// ── Status ───────────────────────────────────────────────────
-bot.onText(/статус подписки/i, async (msg) => {
+// ── Status ───────────────────────────────────────────────────────
+bot.onText(/^📊 Статус подписки$/, async (msg) => {
   if (msg.chat.type !== "private") return;
   const { data: user } = await supabase
     .from("users")
@@ -237,20 +246,30 @@ bot.onText(/статус подписки/i, async (msg) => {
     text = `❌ <b>Подписка истекла</b>`;
   }
 
-  bot.sendMessage(msg.chat.id, text, { parse_mode: "HTML", ...mainKeyboard() });
+  await bot.sendMessage(msg.chat.id, text, { parse_mode: "HTML", ...mainKeyboard() });
 });
 
-// ── Help ─────────────────────────────────────────────────────
+// ── Help ─────────────────────────────────────────────────────────
 // Two-step ticket flow: user presses "❓ Помощь" → bot asks to describe the
 // problem → the user's next message (text or photo) is bundled and sent to
-// the support chat. State is kept in-memory; lost on restart, which is fine
-// for a one-shot flow.
-const pendingHelp = new Set<number>();
+// the support chat. State is kept in-memory with a TTL; lost on restart, which
+// is fine for a one-shot flow.
+const pendingHelp = new Map<number, number>(); // userId → initiated timestamp
 
-bot.onText(/помощь/i, async (msg) => {
+function isPendingHelp(userId: number): boolean {
+  const ts = pendingHelp.get(userId);
+  if (ts === undefined) return false;
+  if (Date.now() - ts > PENDING_HELP_TTL_MS) {
+    pendingHelp.delete(userId);
+    return false;
+  }
+  return true;
+}
+
+bot.onText(/^❓ Помощь$/, async (msg) => {
   if (msg.chat.type !== "private") return;
   if (SUPPORT_CHAT_ID === null) return;
-  pendingHelp.add(msg.from!.id);
+  pendingHelp.set(msg.from!.id, Date.now());
   await bot.sendMessage(
     msg.chat.id,
     "✍️ <b>Опишите вашу проблему</b> одним сообщением.\nМожно приложить скриншот.\n\nДля отмены отправьте /отмена.",
@@ -260,7 +279,7 @@ bot.onText(/помощь/i, async (msg) => {
 
 bot.onText(/^\/отмена$/i, async (msg) => {
   if (msg.chat.type !== "private") return;
-  if (!pendingHelp.has(msg.from!.id)) return;
+  if (!isPendingHelp(msg.from!.id)) return;
   pendingHelp.delete(msg.from!.id);
   await bot.sendMessage(msg.chat.id, "❌ Запрос отменён.", mainKeyboard());
 });
@@ -269,7 +288,7 @@ bot.onText(/^\/отмена$/i, async (msg) => {
 bot.on("message", async (msg) => {
   if (msg.chat.type !== "private") return;
   if (SUPPORT_CHAT_ID === null) return;
-  if (!msg.from || !pendingHelp.has(msg.from.id)) return;
+  if (!msg.from || !isPendingHelp(msg.from.id)) return;
   // Let nav buttons and slash commands pass through to their own handlers.
   if (msg.text && /^(📊|💳|📖|❓|\/)/.test(msg.text)) return;
   if (!msg.text && !msg.photo) return;
@@ -345,7 +364,7 @@ bot.on("message", async (msg) => {
   }
 });
 
-// ── Payment ──────────────────────────────────────────────────
+// ── Payment ──────────────────────────────────────────────────────
 async function sendTelegramInvoice(chatId: number, fromId: number) {
   if (PAYMENT_PROVIDER_TOKEN) {
     await bot.sendInvoice(
@@ -370,7 +389,7 @@ async function sendTelegramInvoice(chatId: number, fromId: number) {
   }
 }
 
-bot.onText(/оплатить подписку/i, async (msg) => {
+bot.onText(/^💳 Оплатить подписку$/, async (msg) => {
   if (msg.chat.type !== "private") return;
   const chatId = msg.chat.id;
 
@@ -398,7 +417,7 @@ bot.onText(/оплатить подписку/i, async (msg) => {
 
 async function startTossOrder(chatId: number, fromId: number) {
   let order: { id: string; memo: string } | null = null;
-  for (let attempt = 0; attempt < 5 && !order; attempt++) {
+  for (let attempt = 0; attempt < MEMO_RETRIES && !order; attempt++) {
     const memo = generateMemo();
     const { data, error } = await supabase
       .from("payment_orders")
@@ -572,7 +591,16 @@ async function handleAdminDecision(
       console.error("[toss-payment-insert]", insertErr);
     }
 
-    const newEnd = await extendSubscription(updated.telegram_id, updated.days);
+    let newEnd: string;
+    try {
+      newEnd = await extendSubscription(updated.telegram_id, updated.days);
+    } catch (e) {
+      console.error("[toss-extend]", e);
+      await bot.answerCallbackQuery(query.id, {
+        text: "Approved (extend failed — check logs)",
+      });
+      return;
+    }
 
     await bot.sendMessage(
       updated.telegram_id,
@@ -668,9 +696,10 @@ bot.on("pre_checkout_query", async (query) => {
   try {
     payload = JSON.parse(query.invoice_payload);
   } catch {
-    return bot.answerPreCheckoutQuery(query.id, false, {
+    await bot.answerPreCheckoutQuery(query.id, false, {
       error_message: "Некорректный счёт.",
     });
+    return;
   }
 
   const ok =
@@ -685,12 +714,13 @@ bot.on("pre_checkout_query", async (query) => {
       query,
       payload,
     });
-    return bot.answerPreCheckoutQuery(query.id, false, {
+    await bot.answerPreCheckoutQuery(query.id, false, {
       error_message: "Несоответствие данных счёта.",
     });
+    return;
   }
 
-  bot.answerPreCheckoutQuery(query.id, true);
+  await bot.answerPreCheckoutQuery(query.id, true);
 });
 
 bot.on("successful_payment", async (msg) => {
@@ -702,10 +732,11 @@ bot.on("successful_payment", async (msg) => {
     payload = JSON.parse(payment.invoice_payload);
   } catch {
     console.error("[payment-parse]", { fromId, raw: payment.invoice_payload });
-    return bot.sendMessage(
+    await bot.sendMessage(
       msg.chat.id,
       "❌ Некорректные данные платежа. Свяжитесь с поддержкой.",
     );
+    return;
   }
 
   if (
@@ -713,17 +744,18 @@ bot.on("successful_payment", async (msg) => {
     typeof payload.days !== "number" ||
     payload.telegram_id !== fromId ||
     payload.days <= 0 ||
-    payload.days > SUBSCRIPTION_DAYS
+    payload.days > 365
   ) {
     console.error("[payment-mismatch]", {
       fromId,
       payload,
       charge: payment.telegram_payment_charge_id,
     });
-    return bot.sendMessage(
+    await bot.sendMessage(
       msg.chat.id,
       "❌ Несоответствие данных платежа. Свяжитесь с поддержкой.",
     );
+    return;
   }
 
   const { error: insertErr } = await supabase.from("payments").insert({
@@ -741,15 +773,26 @@ bot.on("successful_payment", async (msg) => {
       return;
     }
     console.error("[payment-insert]", insertErr);
-    return bot.sendMessage(
+    await bot.sendMessage(
       msg.chat.id,
       "❌ Ошибка обработки платежа. Свяжитесь с поддержкой.",
     );
+    return;
   }
 
-  const newEnd = await extendSubscription(fromId, payload.days);
+  let newEnd: string;
+  try {
+    newEnd = await extendSubscription(fromId, payload.days);
+  } catch (e) {
+    console.error("[payment-extend]", e);
+    await bot.sendMessage(
+      msg.chat.id,
+      "❌ Платёж получен, но не удалось обновить подписку. Свяжитесь с поддержкой.",
+    );
+    return;
+  }
 
-  bot.sendMessage(
+  await bot.sendMessage(
     msg.chat.id,
     `🎉 <b>Оплата прошла!</b>\nПодписка до: <b>${fmtDate(newEnd)}</b>\n\nЗапустите приложение ✅`,
     { parse_mode: "HTML", ...mainKeyboard() },
@@ -759,20 +802,25 @@ bot.on("successful_payment", async (msg) => {
 bot.on("polling_error", (err) => console.error("[polling]", err.message));
 console.log("🤖 Coupang Bot started.");
 
-/**
- * Graceful shutdown on SIGTERM (sent by Railway during redeploy).
- * Ensures polling stops cleanly before the process exits.
- */
-process.on('SIGTERM', () => {
-  console.log('SIGTERM received. Stopping bot polling...');
-
-  bot.stopPolling()
+function stopBot(code: number): void {
+  bot
+    .stopPolling()
     .then(() => {
-      console.log('Polling stopped. Exiting.');
-      process.exit(0);
+      console.log("Polling stopped. Exiting.");
+      process.exit(code);
     })
     .catch((err) => {
-      console.error('Error stopping polling:', err);
+      console.error("Error stopping polling:", err);
       process.exit(1);
     });
+}
+
+process.on("SIGTERM", () => {
+  console.log("SIGTERM received. Stopping bot polling...");
+  stopBot(0);
+});
+
+process.on("SIGINT", () => {
+  console.log("SIGINT received. Stopping bot polling...");
+  stopBot(0);
 });
